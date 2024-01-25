@@ -1,4 +1,4 @@
-import { getISODay, getDaysInMonth, lightFormat, format, subDays  } from "date-fns"
+import { getISODay, getDaysInMonth, lightFormat, format, subDays, addDays } from "date-fns"
 
 /**
  * format date for tailwind calendar
@@ -26,5 +26,18 @@ export function getDates(month: number, year: number) {
       previousMonthDates.push(formattedPreviousMonthDate)
     }
   }
-  return [...previousMonthDates, ...currentMonthDates]
+  // check if last date is Sunday
+  const lastIndex = currentMonthDates.length - 1
+  const lastDayOfMonth = getISODay(currentMonthDates[lastIndex].date)
+  console.log("tt: ", lastDayOfMonth)
+  const nextMonthDates = []
+  // since it's not sunday, get the succeeding dates
+  if (lastDayOfMonth != 7) {
+    for (let i = 1; i <= 7 - lastDayOfMonth; i++) {
+      const nextMonthDate = format(addDays(currentMonthDates[lastIndex].date, i), "yyyy-MM-dd")
+      const formattedNextMonthDate = dateFormatter(nextMonthDate, false)
+      nextMonthDates.push(formattedNextMonthDate)
+    }
+  }
+  return [...previousMonthDates, ...currentMonthDates, ...nextMonthDates]
 }
