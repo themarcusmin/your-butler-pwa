@@ -1,10 +1,26 @@
-import { getISODay, getDaysInMonth, lightFormat, format, subDays, addDays, getYear } from "date-fns"
+import { getISODay, getDaysInMonth, lightFormat, format, subDays, addDays } from "date-fns"
+
+interface Event {
+  id: number
+  name: string
+  time: string
+  datetime: string
+  href: string
+}
+
+export interface CalendarDate {
+  date: string
+  isCurrentMonth?: boolean
+  events: Event[]
+  isToday?: boolean
+  isSelected?: boolean
+}
 
 /**
  * format date for tailwind calendar
  */
-function dateFormatter(date: string, isCurrentMonth = true) {
-  return { date: date, isCurrentMonth, events: [] }
+function dateFormatter(date: string, isCurrentMonth = true): CalendarDate {
+  return { date: date, ...(isCurrentMonth && { isCurrentMonth }), events: [] }
 }
 
 /**
@@ -12,7 +28,7 @@ function dateFormatter(date: string, isCurrentMonth = true) {
  * i.e. ['2024-02-01', '2024-02-02', ...]
  * month starts from 0
  */
-export function getDates(month: number, year: number) {
+export function getDates(month: number, year: number): CalendarDate[] {
   const numberOfDays = getDaysInMonth(new Date(year, month))
   const currentMonthDatesRaw = Array.from({ length: numberOfDays }, (_, i) =>
     lightFormat(new Date(year, month, i + 1).toISOString(), "yyyy-MM-dd")

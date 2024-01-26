@@ -4,27 +4,29 @@
       class="flex items-center justify-between border-b border-gray-200 px-6 py-4 lg:flex-none"
     >
       <h1 class="text-base font-semibold leading-6 text-gray-900">
-        <time datetime="2024-01">January 2024</time>
+        <time>{{
+          Intl.DateTimeFormat("en", { month: "long" }).format(
+            new Date((currentMonth + 1).toString())
+          ) +
+          " " +
+          currentYear
+        }}</time>
       </h1>
       <div class="flex items-center">
         <div class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
           <button
             type="button"
             class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"
+            @click="previousMonth"
           >
             <span class="sr-only">Previous month</span>
             <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            class="hidden border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block"
-          >
-            Today
           </button>
           <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden" />
           <button
             type="button"
             class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50"
+            @click="nextMonth"
           >
             <span class="sr-only">Next month</span>
             <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
@@ -212,7 +214,7 @@
             v-for="day in days"
             :key="day.date"
             :class="[
-              day.isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-500',
+              day.isCurrentMonth ? 'bg-white' : 'bg-gray-150 text-gray-500',
               'relative px-3 py-2'
             ]"
           >
@@ -283,7 +285,8 @@
         </div>
       </div>
     </div>
-    <div v-if="selectedDay?.events.length > 0" class="px-4 py-10 sm:px-6 lg:hidden">
+    <!-- <div v-if="selectedDay?.events.length > 0" class="px-4 py-10 sm:px-6 lg:hidden">
+      hehe
       <ol
         class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5"
       >
@@ -306,11 +309,12 @@
           >
         </li>
       </ol>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script setup lang="ts">
+// import { ref, reactive } from "vue"
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -320,12 +324,14 @@ import {
 } from "@heroicons/vue/20/solid"
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue"
 
-import { getDates } from "@/utils/calendar"
+import { useCalendarStore } from "@/stores/calendar"
+import { storeToRefs } from "pinia"
 
-const days = getDates(2, 2024)
-console.log({ days })
+const store = useCalendarStore()
+const { currentMonth, currentYear, days } = storeToRefs(store)
+const { previousMonth, nextMonth } = store
 
-const days_ = [
+const daysa = [
   // {},
   { date: "2021-12-27", events: [] },
   { date: "2021-12-28", events: [] },
@@ -375,7 +381,7 @@ const days_ = [
   {
     date: "2022-01-22",
     isCurrentMonth: true,
-    isSelected: true,
+    // isSelected: true,
     events: [
       { id: 4, name: "Maple syrup museum", time: "3PM", datetime: "2022-01-22T15:00", href: "#" },
       { id: 5, name: "Hockey game", time: "7PM", datetime: "2022-01-22T19:00", href: "#" }
@@ -402,5 +408,6 @@ const days_ = [
   { date: "2022-02-05", events: [] },
   { date: "2022-02-06", events: [] }
 ]
-const selectedDay = days.find((day) => day.isSelected)
+// const selectedDay = days.find((day) => day.isSelected)
+// console.log({ selectedDay })
 </script>
