@@ -1,4 +1,4 @@
-import { getISODay, getDaysInMonth, lightFormat, format, subDays, addDays } from "date-fns"
+import { getISODay, getDaysInMonth, lightFormat, format, subDays, addDays, getYear } from "date-fns"
 
 /**
  * format date for tailwind calendar
@@ -10,11 +10,12 @@ function dateFormatter(date: string, isCurrentMonth = true) {
 /**
  * generate a list of dates
  * i.e. ['2024-02-01', '2024-02-02', ...]
+ * month starts from 0
  */
 export function getDates(month: number, year: number) {
-  const numberOfDays = getDaysInMonth(new Date(year, month - 1, 15))
+  const numberOfDays = getDaysInMonth(new Date(year, month))
   const currentMonthDatesRaw = Array.from({ length: numberOfDays }, (_, i) =>
-    lightFormat(new Date(year, month - 1, i + 1).toISOString(), "yyyy-MM-dd")
+    lightFormat(new Date(year, month, i + 1).toISOString(), "yyyy-MM-dd")
   )
   const currentMonthDates = currentMonthDatesRaw.map((date: string) => dateFormatter(date))
   // check if first date is Monday
@@ -34,7 +35,6 @@ export function getDates(month: number, year: number) {
   // check if last date is Sunday
   const lastIndex = currentMonthDates.length - 1
   const lastDayOfMonth = getISODay(currentMonthDates[lastIndex].date)
-  console.log("tt: ", lastDayOfMonth)
   const nextMonthDates = []
   // since it's not sunday, get the succeeding dates
   if (lastDayOfMonth != 7) {
