@@ -1,20 +1,15 @@
-import { ref, onMounted } from "vue"
+import { ref } from "vue"
 import { defineStore } from "pinia"
 
 import { getDates } from "@/utils/calendar"
 import type { CalendarDate } from "@/utils/calendar"
 
-export const useCalendarStore = defineStore("counter", () => {
-  const currentMonth = ref<number>(0)
-  const currentYear = ref<number>(0)
-  const days = ref<CalendarDate[]>()
+export const useCalendarStore = defineStore("calendar", () => {
+  const today = new Date()
 
-  onMounted(() => {
-    const today = new Date()
-    currentMonth.value = today.getMonth()
-    currentYear.value = today.getFullYear()
-    days.value = getDates(currentMonth.value, currentYear.value)
-  })
+  const currentMonth = ref<number>(today.getMonth())
+  const currentYear = ref<number>(today.getFullYear())
+  const days = ref<CalendarDate[]>(getDates(currentMonth.value, currentYear.value))
 
   function nextMonth(): void {
     if (currentMonth.value == 11) {
