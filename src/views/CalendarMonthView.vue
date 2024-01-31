@@ -209,7 +209,10 @@
         <div class="bg-white py-2">S<span class="sr-only sm:not-sr-only">un</span></div>
       </div>
       <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 lg:flex-auto">
-        <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-6 lg:gap-px">
+        <div
+          class="hidden w-full lg:grid lg:grid-cols-7 lg:gap-px"
+          :class="[days.length > 35 ? 'lg:grid-rows-6' : 'lggrid-rows-5']"
+        >
           <div
             v-for="day in days"
             :key="day.date"
@@ -248,7 +251,10 @@
             </ol>
           </div>
         </div>
-        <div class="isolate grid w-full grid-cols-7 grid-rows-6 gap-px lg:hidden">
+        <div
+          class="isolate grid w-full grid-cols-7 gap-px lg:hidden"
+          :class="[days.length > 35 ? 'grid-rows-6' : 'grid-rows-5']"
+        >
           <button
             v-for="day in days"
             :key="day.date"
@@ -314,7 +320,6 @@
 </template>
 
 <script setup lang="ts">
-// import { ref, reactive } from "vue"
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
