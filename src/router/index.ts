@@ -1,20 +1,20 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
-import CalendarMonthView from '@/views/CalendarMonthView.vue'
+import { createRouter, createWebHistory } from "vue-router"
+import HomeView from "@/views/HomeView.vue"
+import MainLayout from "@/components/Layouts/MainLayout.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'home',
+      path: "/",
+      name: "home",
       component: HomeView
     },
     {
-      path: '/month',
-      name: 'month',
-      component: CalendarMonthView
-    },
+      path: "/app",
+      name: "app",
+      component: MainLayout
+    }
   ]
 })
 

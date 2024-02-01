@@ -100,6 +100,7 @@
           </Menu>
           <div class="ml-6 h-6 w-px bg-gray-300" />
           <button
+            @click="openAddEventModal"
             type="button"
             class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
@@ -330,11 +331,21 @@ import {
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue"
 
 import { useCalendarStore } from "@/stores/calendar"
+import { useModalStore } from "@/stores/modal"
 import { storeToRefs } from "pinia"
+
+import AddEventForm from "@/components/Form/AddEventForm.vue"
 
 const store = useCalendarStore()
 const { currentMonth, currentYear, days } = storeToRefs(store)
 const { previousMonth, nextMonth } = store
+
+const modalStore = useModalStore()
+const { openModal } = modalStore
+
+function openAddEventModal() {
+  openModal({ component: AddEventForm, props: { title: "Add Event" } })
+}
 
 const daysa = [
   // {},
