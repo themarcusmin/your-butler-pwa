@@ -252,6 +252,7 @@
             </ol>
           </div>
         </div>
+        <!-- for smaller screens -->
         <div
           class="isolate grid w-full grid-cols-7 gap-px lg:hidden"
           :class="[days.length > 35 ? 'grid-rows-6' : 'grid-rows-5']"
@@ -273,9 +274,9 @@
             <time
               :datetime="day.date"
               :class="[
+                day.isToday &&
+                  'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white',
                 day.isSelected && 'flex h-6 w-6 items-center justify-center rounded-full',
-                day.isSelected && day.isToday && 'bg-indigo-600',
-                day.isSelected && !day.isToday && 'bg-gray-900',
                 'ml-auto'
               ]"
               >{{ day.date.split("-").pop().replace(/^0/, "") }}</time
