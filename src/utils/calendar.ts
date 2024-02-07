@@ -17,15 +17,37 @@ export interface CalendarDate {
 }
 
 /**
+ * check if date string is today
+ * @param date i.e "2024-02-01"
+ */
+function checkIsToday(date: string): boolean {
+  const inputDate = new Date(date)
+  const todayDate = new Date()
+  if (inputDate.setHours(0, 0, 0, 0) == todayDate.setHours(0, 0, 0, 0)) return true
+  return false
+}
+
+interface DateFormatterProps {
+  date: string
+  isCurrentMonth?: boolean
+}
+/**
  * format date for tailwind calendar
  */
-function dateFormatter(date: string, isCurrentMonth = true): CalendarDate {
-  return { date: date, ...(isCurrentMonth && { isCurrentMonth }), events: [] }
+function dateFormatter({ date, isCurrentMonth }: DateFormatterProps): CalendarDate {
+  let isToday
+  if (isCurrentMonth && checkIsToday(date)) isToday = true
+  return {
+    date: date,
+    ...(isCurrentMonth && { isCurrentMonth }),
+    ...(isToday && { isToday }),
+    events: []
+  }
 }
 
 /**
- * generate a list of dates
- * i.e. ['2024-02-01', '2024-02-02', ...]
+ * generate a list of CalendarDate
+ * i.e. [{ date: "2024-02-01", ...}, ...]
  * month starts from 0
  */
 export function getDates(month: number, year: number): CalendarDate[] {
@@ -33,7 +55,9 @@ export function getDates(month: number, year: number): CalendarDate[] {
   const currentMonthDatesRaw = Array.from({ length: numberOfDays }, (_, i) =>
     lightFormat(new Date(year, month, i + 1).toISOString(), "yyyy-MM-dd")
   )
-  const currentMonthDates = currentMonthDatesRaw.map((date: string) => dateFormatter(date))
+  const currentMonthDates = currentMonthDatesRaw.map((date: string) =>
+    dateFormatter({ date, isCurrentMonth: true })
+  )
   // check if first date is Monday
   const firstDayOfMonth = getISODay(currentMonthDates[0].date)
   const previousMonthDates = []
@@ -44,7 +68,10 @@ export function getDates(month: number, year: number): CalendarDate[] {
         subDays(currentMonthDates[0].date, firstDayOfMonth - i),
         "yyyy-MM-dd"
       )
-      const formattedPreviousMonthDate = dateFormatter(previousMonthDate, false)
+      const formattedPreviousMonthDate = dateFormatter({
+        date: previousMonthDate,
+        isCurrentMonth: false
+      })
       previousMonthDates.push(formattedPreviousMonthDate)
     }
   }
@@ -56,7 +83,7 @@ export function getDates(month: number, year: number): CalendarDate[] {
   if (lastDayOfMonth != 7) {
     for (let i = 1; i <= 7 - lastDayOfMonth; i++) {
       const nextMonthDate = format(addDays(currentMonthDates[lastIndex].date, i), "yyyy-MM-dd")
-      const formattedNextMonthDate = dateFormatter(nextMonthDate, false)
+      const formattedNextMonthDate = dateFormatter({ date: nextMonthDate, isCurrentMonth: false })
       nextMonthDates.push(formattedNextMonthDate)
     }
   }
