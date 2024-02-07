@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router"
+import AppNotification from "@/components/Notifications/AppNotification.vue"
 import Modal from "@/components/Overlays/GenericModal.vue"
 </script>
 
 <template>
-  <div>
-    <RouterView />
-    <Modal />
-  </div>
+  <RouterView />
+  <Modal />
+  <AppNotification />
 </template>
 
 <style lang=""></style>
