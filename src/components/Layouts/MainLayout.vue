@@ -1,7 +1,9 @@
-<script setup lang="tsx">
-import CalendarMonthView from "@/views/CalendarMonthView.vue"
+<script setup lang="ts">
+import { RouterView } from "vue-router"
+import NavBar from "@/components/Navigation/NavBar.vue"
 </script>
 
 <template>
-  <CalendarMonthView />
+  <NavBar />
+  <RouterView />
 </template>

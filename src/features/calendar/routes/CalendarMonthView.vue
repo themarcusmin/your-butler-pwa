@@ -294,30 +294,30 @@
       </div>
     </div>
     <!-- <div v-if="selectedDay?.events.length > 0" class="px-4 py-10 sm:px-6 lg:hidden">
-      hehe
-      <ol
-        class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5"
-      >
-        <li
-          v-for="event in selectedDay.events"
-          :key="event.id"
-          class="group flex p-4 pr-6 focus-within:bg-gray-50 hover:bg-gray-50"
+        hehe
+        <ol
+          class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow ring-1 ring-black ring-opacity-5"
         >
-          <div class="flex-auto">
-            <p class="font-semibold text-gray-900">{{ event.name }}</p>
-            <time :datetime="event.datetime" class="mt-2 flex items-center text-gray-700">
-              <ClockIcon class="mr-2 h-5 w-5 text-gray-400" aria-hidden="true" />
-              {{ event.time }}
-            </time>
-          </div>
-          <a
-            :href="event.href"
-            class="ml-6 flex-none self-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400 focus:opacity-100 group-hover:opacity-100"
-            >Edit<span class="sr-only">, {{ event.name }}</span></a
+          <li
+            v-for="event in selectedDay.events"
+            :key="event.id"
+            class="group flex p-4 pr-6 focus-within:bg-gray-50 hover:bg-gray-50"
           >
-        </li>
-      </ol>
-    </div> -->
+            <div class="flex-auto">
+              <p class="font-semibold text-gray-900">{{ event.name }}</p>
+              <time :datetime="event.datetime" class="mt-2 flex items-center text-gray-700">
+                <ClockIcon class="mr-2 h-5 w-5 text-gray-400" aria-hidden="true" />
+                {{ event.time }}
+              </time>
+            </div>
+            <a
+              :href="event.href"
+              class="ml-6 flex-none self-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400 focus:opacity-100 group-hover:opacity-100"
+              >Edit<span class="sr-only">, {{ event.name }}</span></a
+            >
+          </li>
+        </ol>
+      </div> -->
   </div>
 </template>
 
@@ -336,6 +336,9 @@ import { useModalStore } from "@/stores/modal"
 import { storeToRefs } from "pinia"
 
 import AddEventForm from "@/components/Form/AddEventForm.vue"
+
+import { VITE_API_AUTH_0_DOMAIN } from "@/config/auth"
+console.log({ VITE_API_AUTH_0_DOMAIN })
 
 const store = useCalendarStore()
 const { currentMonth, currentYear, days } = storeToRefs(store)
