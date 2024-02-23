@@ -10,6 +10,7 @@ export const useCalendarStore = defineStore("calendar", () => {
   const currentMonth = ref<number>(today.getMonth())
   const currentYear = ref<number>(today.getFullYear())
   const days = ref<CalendarDate[]>(getDates(currentMonth.value, currentYear.value))
+  const selectedDay = ref(days.value.find((day) => day.isToday))
 
   function nextMonth(): void {
     if (currentMonth.value == 11) {
@@ -31,5 +32,9 @@ export const useCalendarStore = defineStore("calendar", () => {
     days.value = getDates(currentMonth.value, currentYear.value)
   }
 
-  return { currentMonth, currentYear, days, nextMonth, previousMonth }
+  function setSelectedDay(day: CalendarDate) {
+    selectedDay.value = day
+  }
+
+  return { currentMonth, currentYear, days, nextMonth, previousMonth, selectedDay, setSelectedDay }
 })
