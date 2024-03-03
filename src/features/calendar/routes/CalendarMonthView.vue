@@ -354,7 +354,7 @@ const modalStore = useModalStore()
 const { openModal } = modalStore
 
 function openAddEventModal() {
-  openModal({ component: AddEventForm, props: { title: "Add Event" } })
+  openModal({ component: AddEventForm, props: { formTitle: "Add Event" } })
 }
 
 const daysa = [
