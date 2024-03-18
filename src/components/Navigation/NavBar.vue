@@ -9,13 +9,39 @@ import {
   MenuItems
 } from "@headlessui/vue"
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/vue/24/outline"
+import { signOut } from "firebase/auth"
+import { useCurrentUser, useFirebaseAuth } from "vuefire"
 
-import { useAuth0 } from "@auth0/auth0-vue"
+import { useRoute } from "vue-router"
+import router from "@/router"
+import { LANDING } from "@/router/public"
+import { CALENDAR, SETTINGS } from "@/router/private"
+import logo from "@/assets/logo.svg"
 
-const { logout } = useAuth0()
+const navItems = [
+  {
+    href: CALENDAR,
+    routeName: CALENDAR,
+    title: "Calendar"
+  },
+  {
+    href: SETTINGS,
+    routeName: SETTINGS,
+    title: "Settings"
+  }
+]
 
-function logoutWithRedirect() {
-  return logout({ logoutParams: { returnTo: window.location.origin } })
+const user = useCurrentUser()!
+const auth = useFirebaseAuth()!
+const route = useRoute()
+
+async function logout() {
+  await signOut(auth)
+  router.push({ name: LANDING })
+}
+
+if (user) {
+  console.log("aasasf", user)
 }
 </script>
 
@@ -25,21 +51,20 @@ function logoutWithRedirect() {
       <div class="flex h-16 justify-between">
         <div class="flex">
           <div class="flex flex-shrink-0 items-center">
-            <img
-              class="h-8 w-auto"
-              src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-              alt="Your Company"
-            />
+            <img class="h-8 w-auto" :src="logo" alt="Intent Logo" />
           </div>
-          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-            <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-            <!-- not selected: "inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-            <a
-              href="#"
-              class="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
-              >Calendar</a
-            >
-          </div>
+          <template v-for="navItem in navItems" :key="navItem.routeName">
+            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <a
+                :href="navItem.href"
+                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500"
+                :class="{
+                  'border-indigo-500 text-gray-900 border-b-2': route.name === navItem.routeName
+                }"
+                >{{ navItem.title }}</a
+              >
+            </div>
+          </template>
         </div>
         <div class="hidden sm:ml-6 sm:flex sm:items-center">
           <button
@@ -77,24 +102,22 @@ function logoutWithRedirect() {
               <MenuItems
                 class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
               >
-                <!-- <MenuItem v-slot="{ active }">
+                <MenuItem v-if="user" v-slot="{ active }">
                   <a
                     href="#"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
-                    >Your Profile</a
+                    >{{ user.providerData[0].displayName }}</a
                   >
                 </MenuItem>
-                <MenuItem v-slot="{ active }">
+                <!-- <MenuItem v-slot="{ active }">
                   <a
                     href="#"
                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
                     >Settings</a
                   >
                 </MenuItem> -->
-                <MenuItem v-slot="{ active }">
-                  <a
-                    @click="logoutWithRedirect"
-                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
+                <MenuItem v-slot="{ active }" @click="logout">
+                  <a :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
                     >Sign out</a
                   >
                 </MenuItem>
@@ -119,14 +142,28 @@ function logoutWithRedirect() {
     <!-- Mobile Nav -->
     <DisclosurePanel class="sm:hidden">
       <div class="space-y-1 pb-3 pt-2">
-        <!-- Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700" -->
-        <!-- not selected: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" -->
-        <DisclosureButton
-          as="a"
-          href="#"
-          class="block border-l-4 border-indigo-500 bg-indigo-50 py-2 pl-3 pr-4 text-base font-medium text-indigo-700"
-          >Calendar</DisclosureButton
-        >
+        <template v-for="navItem in navItems" :key="navItem.routeName">
+          <DisclosureButton
+            as="a"
+            :href="navItem.href"
+            class="block py-2 pl-3 pr-4 text-base font-medium text-gray-500"
+            :class="{
+              'block border-l-4 border-indigo-500 bg-indigo-50 text-indigo-700 ':
+                route.name === navItem.routeName
+            }"
+            >{{ navItem.title }}</DisclosureButton
+          >
+          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <a
+              :href="navItem.href"
+              class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500"
+              :class="{
+                'border-indigo-500 text-gray-900 border-b-2': route.name === navItem.routeName
+              }"
+              >{{ navItem.title }}</a
+            >
+          </div>
+        </template>
       </div>
       <div class="border-t border-gray-200 pb-3 pt-4">
         <div class="flex items-center px-4">
@@ -137,9 +174,11 @@ function logoutWithRedirect() {
               alt=""
             />
           </div>
-          <div class="ml-3">
-            <div class="text-base font-medium text-gray-800">Tom Cook</div>
-            <div class="text-sm font-medium text-gray-500">tom@example.com</div>
+          <div class="ml-3" v-if="user">
+            <div class="text-base font-medium text-gray-800">
+              {{ user.providerData[0].displayName }}
+            </div>
+            <div class="text-sm font-medium text-gray-500">{{ user.email }}</div>
           </div>
           <button
             type="button"
@@ -164,7 +203,7 @@ function logoutWithRedirect() {
             >Settings</DisclosureButton
           > -->
           <DisclosureButton
-            @click="logoutWithRedirect"
+            @click="logout"
             class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
             >Sign out</DisclosureButton
           >

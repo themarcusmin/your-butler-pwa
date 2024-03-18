@@ -24,11 +24,13 @@
     "@vee-validate/zod": "^4.12.5",
     "axios": "^1.6.7",
     "date-fns": "^3.3.1",
+    "firebase": "^10.9.0",
     "nanoid": "^5.0.5",
     "pinia": "^2.1.7",
     "vee-validate": "^4.12.5",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5",
+    "vuefire": "^3.1.23",
     "zod": "^3.22.4"
   },
   "devDependencies": {

@@ -6,6 +6,7 @@ export const publicRoutes = [
   {
     path: "/",
     name: LANDING,
-    component: LandingView
+    component: LandingView,
+    meta: { requiresAuth: false }
   }
 ]

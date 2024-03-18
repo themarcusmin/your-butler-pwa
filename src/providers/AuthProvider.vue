@@ -1,27 +1,26 @@
 <script setup lang="ts">
-import { useAuth0 } from "@auth0/auth0-vue"
+import { getCurrentUser } from "vuefire"
+
 import router from "@/router"
-import LoadingSpinner from "@/components/Loader/LoadingSpinner.vue"
 import { LANDING } from "@/router/public"
+import { CALENDAR } from "@/router/private"
 
-const { isAuthenticated, isLoading } = useAuth0()
-
-router.beforeEach((to, from, next) => {
-  if (to.name === LANDING && isAuthenticated.value) next({ name: "calendar" })
-  else next()
+router.beforeEach(async (to) => {
+  const currentUser = await getCurrentUser()
+  // redirect to landing page if unauthenticated
+  if (to.meta.requiresAuth) {
+    if (!currentUser)
+      return {
+        name: LANDING
+      }
+  }
+  // redirect to calendar page if unauthenticated
+  else if (to.meta.requiresAuth === false) {
+    if (currentUser) return { name: CALENDAR }
+  }
 })
 </script>
 
 <template>
-  <template v-if="isAuthenticated">
-    <slot></slot>
-  </template>
-  <template v-else-if="isLoading">
-    <div class="h-dvh flex justify-center items-center">
-      <LoadingSpinner />
-    </div>
-  </template>
-  <template v-else>
-    <slot></slot>
-  </template>
+  <slot> </slot>
 </template>

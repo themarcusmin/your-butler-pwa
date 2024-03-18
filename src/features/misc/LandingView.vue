@@ -1,18 +1,40 @@
 <script setup lang="ts">
-import router from "@/router"
-import { useAuth0 } from "@auth0/auth0-vue"
-const { loginWithRedirect } = useAuth0()
+import { signInWithRedirect, getRedirectResult } from "firebase/auth"
+import { googleAuthProvider } from "@/lib/firebase"
+import { useFirebaseAuth } from "vuefire"
+import { onMounted, ref } from "vue"
 
-const { isAuthenticated } = useAuth0()
+import LoadingSpinner from "@/components/Loader/LoadingSpinner.vue"
 
-function getStarted() {
-  if (isAuthenticated.value) router.push({ name: "calendar" })
-  else loginWithRedirect()
+const auth = useFirebaseAuth()!
+
+const loadingSpinner = ref(false)
+const error = ref(null)
+
+async function getStarted() {
+  signInWithRedirect(auth, googleAuthProvider)
+    .catch((reason) => {
+      console.error("Failed signinRedirect", reason)
+      error.value = reason
+    })
+    .then(() => {
+      loadingSpinner.value = true
+    })
 }
+
+onMounted(() => {
+  getRedirectResult(auth).catch((reason) => {
+    console.error("Failed redirect result", reason)
+    error.value = reason
+  })
+})
 </script>
 
 <template>
-  <div class="bg-white h-[100vh] flex items-center">
+  <div v-if="loadingSpinner" class="h-dvh flex justify-center items-center">
+    <LoadingSpinner />
+  </div>
+  <div v-else class="bg-white h-[100vh] flex items-center">
     <div class="max-w-7xl mx-auto text-center py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
       <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
         <span class="block">Intent</span>
@@ -22,7 +44,7 @@ function getStarted() {
         <div
           class="inline-flex shadow border rounded-md px-6 py-2 bg-indigo-700 hover:bg-indigo-600 hover:cursor-pointer text-neutral-50"
         >
-          <button class="cursor-pointer" @click="getStarted">GET STARTED</button>
+          <button id="login" class="cursor-pointer" @click="getStarted">GET STARTED</button>
         </div>
       </div>
     </div>
