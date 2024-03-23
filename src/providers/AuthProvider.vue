@@ -1,12 +1,19 @@
 <script setup lang="ts">
+import { ref } from "vue"
 import { getCurrentUser } from "vuefire"
 
 import router from "@/router"
 import { LANDING } from "@/router/public"
 import { CALENDAR } from "@/router/private"
+import LoadingSpinner from "@/components/Loader/LoadingSpinner.vue"
+
+const isLoading = ref(false)
 
 router.beforeEach(async (to) => {
+  isLoading.value = true
   const currentUser = await getCurrentUser()
+  isLoading.value = false
+
   // redirect to landing page if unauthenticated
   if (to.meta.requiresAuth) {
     if (!currentUser)
@@ -14,7 +21,7 @@ router.beforeEach(async (to) => {
         name: LANDING
       }
   }
-  // redirect to calendar page if unauthenticated
+  // redirect to calendar page if authenticated
   else if (to.meta.requiresAuth === false) {
     if (currentUser) return { name: CALENDAR }
   }
@@ -22,5 +29,12 @@ router.beforeEach(async (to) => {
 </script>
 
 <template>
-  <slot> </slot>
+  <template v-if="isLoading">
+    <div class="h-dvh flex justify-center items-center">
+      <LoadingSpinner />
+    </div>
+  </template>
+  <template v-else>
+    <slot></slot>
+  </template>
 </template>
