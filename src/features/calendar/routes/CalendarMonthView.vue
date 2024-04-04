@@ -1,4 +1,5 @@
 <template>
+  <AppHead title="Calendar" />
   <LoadingSpinner v-if="isLoading" />
   <div v-else class="lg:flex lg:h-full lg:flex-col">
     <header
@@ -343,6 +344,7 @@ import { useCalendarStore } from "@/stores/calendar"
 import { useModalStore } from "@/stores/modal"
 import { storeToRefs } from "pinia"
 
+import AppHead from "@/components/Head/AppHead.vue"
 import LoadingSpinner from "@/components/Loader/LoadingSpinner.vue"
 import AddEventForm from "@/features/calendar/components/AddEventForm.vue"
 import { useEvents } from "@/features/calendar/api/getEvents"

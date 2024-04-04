@@ -4,6 +4,7 @@ import { googleAuthProvider } from "@/lib/firebase"
 import { useFirebaseAuth } from "vuefire"
 import { onMounted, ref } from "vue"
 
+import AppHead from "@/components/Head/AppHead.vue"
 import LoadingSpinner from "@/components/Loader/LoadingSpinner.vue"
 
 const auth = useFirebaseAuth()!
@@ -31,9 +32,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="loadingSpinner" class="h-dvh flex justify-center items-center">
-    <LoadingSpinner />
-  </div>
+  <AppHead description="Welcome to Intent" />
+  <LoadingSpinner v-if="loadingSpinner" />
   <div v-else class="bg-white h-[100vh] flex items-center">
     <div class="max-w-7xl mx-auto text-center py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
       <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
