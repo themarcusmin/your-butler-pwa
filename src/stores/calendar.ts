@@ -1,5 +1,6 @@
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import { defineStore } from "pinia"
+import { startOfDay, endOfDay } from "date-fns"
 
 import { getDates } from "@/utils/calendar"
 import type { CalendarDate } from "@/utils/calendar"
@@ -9,8 +10,16 @@ export const useCalendarStore = defineStore("calendar", () => {
 
   const currentMonth = ref<number>(today.getMonth())
   const currentYear = ref<number>(today.getFullYear())
-  const days = ref<CalendarDate[]>(getDates(currentMonth.value, currentYear.value))
-  const selectedDay = ref(days.value.find((day) => day.isToday))
+
+  const daysTemplate = computed(() => getDates(currentMonth.value, currentYear.value))
+  const eventStartTime = computed(() =>
+    startOfDay(new Date(daysTemplate.value[0].date)).toISOString()
+  )
+  const eventEndTime = computed(() =>
+    endOfDay(new Date(daysTemplate.value[daysTemplate.value.length - 1].date)).toISOString()
+  )
+
+  const selectedDay = ref(daysTemplate.value.find((day) => day.isToday))
 
   function nextMonth(): void {
     if (currentMonth.value == 11) {
@@ -19,7 +28,6 @@ export const useCalendarStore = defineStore("calendar", () => {
     } else {
       currentMonth.value++
     }
-    days.value = getDates(currentMonth.value, currentYear.value)
   }
 
   function previousMonth(): void {
@@ -29,12 +37,20 @@ export const useCalendarStore = defineStore("calendar", () => {
     } else {
       currentMonth.value--
     }
-    days.value = getDates(currentMonth.value, currentYear.value)
   }
 
   function setSelectedDay(day: CalendarDate) {
     selectedDay.value = day
   }
 
-  return { currentMonth, currentYear, days, nextMonth, previousMonth, selectedDay, setSelectedDay }
+  return {
+    currentMonth,
+    currentYear,
+    eventStartTime,
+    eventEndTime,
+    nextMonth,
+    previousMonth,
+    selectedDay,
+    setSelectedDay
+  }
 })

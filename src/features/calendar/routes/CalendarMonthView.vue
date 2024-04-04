@@ -1,5 +1,6 @@
 <template>
-  <div class="lg:flex lg:h-full lg:flex-col">
+  <LoadingSpinner v-if="isLoading" />
+  <div v-else class="lg:flex lg:h-full lg:flex-col">
     <header
       class="flex items-center justify-between border-b border-gray-200 px-6 py-4 lg:flex-none"
     >
@@ -234,16 +235,16 @@
             >
             <ol v-if="day.events.length > 0" class="mt-2">
               <li v-for="event in day.events.slice(0, 2)" :key="event.id">
-                <a :href="event.href" class="group flex">
+                <a :href="`event/${event.id}`" class="group flex">
                   <p
                     class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600"
                   >
                     {{ event.name }}
                   </p>
                   <time
-                    :datetime="event.datetime"
+                    :datetime="event.dateTime"
                     class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block"
-                    >{{ event.time }}</time
+                    >{{ event.description }}</time
                   >
                 </a>
               </li>
@@ -310,13 +311,13 @@
         >
           <div class="flex-auto">
             <p class="font-semibold text-gray-900">{{ event.name }}</p>
-            <time :datetime="event.datetime" class="mt-2 flex items-center text-gray-700">
+            <time :datetime="event.dateTime" class="mt-2 flex items-center text-gray-700">
               <ClockIcon class="mr-2 h-5 w-5 text-gray-400" aria-hidden="true" />
-              {{ event.time }}
+              {{ event.timeRange12HourFormat }}
             </time>
           </div>
           <a
-            :href="event.href"
+            :href="`event/${event.id}`"
             class="ml-6 flex-none self-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400 focus:opacity-100 group-hover:opacity-100"
             >Edit<span class="sr-only">, {{ event.name }}</span></a
           >
@@ -327,6 +328,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch, toRaw } from "vue"
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -341,99 +343,53 @@ import { useCalendarStore } from "@/stores/calendar"
 import { useModalStore } from "@/stores/modal"
 import { storeToRefs } from "pinia"
 
-import AddEventForm from "@/components/Form/AddEventForm.vue"
-
-import { VITE_API_AUTH_0_DOMAIN } from "@/config/auth"
-console.log({ VITE_API_AUTH_0_DOMAIN })
+import LoadingSpinner from "@/components/Loader/LoadingSpinner.vue"
+import AddEventForm from "@/features/calendar/components/AddEventForm.vue"
+import { useEvents } from "@/features/calendar/api/getEvents"
+import { populatedDays } from "@/utils/calendar"
 
 const store = useCalendarStore()
-const { currentMonth, currentYear, days, selectedDay } = storeToRefs(store)
+const { currentMonth, currentYear, selectedDay, eventStartTime, eventEndTime } = storeToRefs(store)
 const { previousMonth, nextMonth, setSelectedDay } = store
-
 const modalStore = useModalStore()
 const { openModal } = modalStore
 
-function openAddEventModal() {
+async function openAddEventModal() {
   openModal({ component: AddEventForm, props: { formTitle: "Add Event" } })
 }
 
-const daysa = [
-  // {},
-  { date: "2021-12-27", events: [] },
-  { date: "2021-12-28", events: [] },
-  { date: "2021-12-29", events: [] },
-  { date: "2021-12-30", events: [] },
-  { date: "2021-12-31", events: [] },
-  { date: "2022-01-01", isCurrentMonth: true, events: [] },
-  { date: "2022-01-02", isCurrentMonth: true, events: [] },
-  {
-    date: "2022-01-03",
-    isCurrentMonth: true,
-    events: [
-      { id: 1, name: "Design review", time: "10AM", datetime: "2022-01-03T10:00", href: "#" },
-      { id: 2, name: "Sales meeting", time: "2PM", datetime: "2022-01-03T14:00", href: "#" },
-      { id: 3, name: "Food", time: "2PM", datetime: "2022-01-03T14:00", href: "#" }
-    ]
-  },
-  { date: "2022-01-04", isCurrentMonth: true, events: [] },
-  { date: "2022-01-05", isCurrentMonth: true, events: [] },
-  { date: "2022-01-06", isCurrentMonth: true, events: [] },
-  {
-    date: "2022-01-07",
-    isCurrentMonth: true,
-    events: [{ id: 3, name: "Date night", time: "6PM", datetime: "2022-01-08T18:00", href: "#" }]
-  },
-  { date: "2022-01-08", isCurrentMonth: true, events: [] },
-  { date: "2022-01-09", isCurrentMonth: true, events: [] },
-  { date: "2022-01-10", isCurrentMonth: true, events: [] },
-  { date: "2022-01-11", isCurrentMonth: true, events: [] },
-  {
-    date: "2022-01-12",
-    isCurrentMonth: true,
-    isToday: true,
-    events: [
-      { id: 6, name: "Sam's birthday party", time: "2PM", datetime: "2022-01-25T14:00", href: "#" }
-    ]
-  },
-  { date: "2022-01-13", isCurrentMonth: true, events: [] },
-  { date: "2022-01-14", isCurrentMonth: true, events: [] },
-  { date: "2022-01-15", isCurrentMonth: true, events: [] },
-  { date: "2022-01-16", isCurrentMonth: true, events: [] },
-  { date: "2022-01-17", isCurrentMonth: true, events: [] },
-  { date: "2022-01-18", isCurrentMonth: true, events: [] },
-  { date: "2022-01-19", isCurrentMonth: true, events: [] },
-  { date: "2022-01-20", isCurrentMonth: true, events: [] },
-  { date: "2022-01-21", isCurrentMonth: true, events: [] },
-  {
-    date: "2022-01-22",
-    isCurrentMonth: true,
-    // isSelected: true,
-    events: [
-      { id: 4, name: "Maple syrup museum", time: "3PM", datetime: "2022-01-22T15:00", href: "#" },
-      { id: 5, name: "Hockey game", time: "7PM", datetime: "2022-01-22T19:00", href: "#" }
-    ]
-  },
-  { date: "2022-01-23", isCurrentMonth: true, events: [] },
-  { date: "2022-01-24", isCurrentMonth: true, events: [] },
-  { date: "2022-01-25", isCurrentMonth: true, events: [] },
-  { date: "2022-01-26", isCurrentMonth: true, events: [] },
-  { date: "2022-01-27", isCurrentMonth: true, events: [] },
-  { date: "2022-01-28", isCurrentMonth: true, events: [] },
-  { date: "2022-01-29", isCurrentMonth: true, events: [] },
-  { date: "2022-01-30", isCurrentMonth: true, events: [] },
-  { date: "2022-01-31", isCurrentMonth: true, events: [] },
-  { date: "2022-02-01", events: [] },
-  { date: "2022-02-02", events: [] },
-  { date: "2022-02-03", events: [] },
-  {
-    date: "2022-02-04",
-    events: [
-      { id: 7, name: "Cinema with friends", time: "9PM", datetime: "2022-02-04T21:00", href: "#" }
-    ]
-  },
-  { date: "2022-02-05", events: [] },
-  { date: "2022-02-06", events: [] }
-]
-// const selectedDay = days.find((day) => day.isSelected)
-// console.log({ selectedDay })
+/**
+ * data fetching & transformation
+ */
+import type { Event } from "../types"
+
+const { data, isLoading } = useEvents({
+  eventStartTime: eventStartTime,
+  eventEndTime: eventEndTime
+})
+
+interface CalendarDictionary {
+  [key: string]: Event[]
+}
+
+const calendarDictionary = ref<CalendarDictionary>({})
+
+const days = computed(() => {
+  const events = calendarDictionary.value[`${eventStartTime.value}-${eventEndTime.value}`]
+  if (events && events.length) {
+    return populatedDays({
+      events,
+      timeRange: { month: currentMonth.value, year: currentYear.value }
+    })
+  } else return null
+})
+
+watch(data, (newData) => {
+  const newEvents = toRaw(newData)
+  if (newEvents && newEvents.length)
+    calendarDictionary.value = {
+      ...calendarDictionary.value,
+      [`${eventStartTime.value}-${eventEndTime.value}`]: newEvents
+    }
+})
 </script>

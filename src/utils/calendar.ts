@@ -1,17 +1,28 @@
-import { getISODay, getDaysInMonth, lightFormat, format, subDays, addDays } from "date-fns"
+import {
+  getISODay,
+  getDaysInMonth,
+  lightFormat,
+  format,
+  subDays,
+  addDays,
+  addMonths,
+  parseISO
+} from "date-fns"
+import type { Event } from "@/features/calendar/types"
 
-interface Event {
+interface CalendarEvent {
   id: number
   name: string
-  time: string
-  datetime: string
-  href: string
+  description: string
+  location: string
+  timeRange12HourFormat: string
+  dateTime: string
 }
 
 export interface CalendarDate {
   date: string
   isCurrentMonth?: boolean
-  events: Event[]
+  events: CalendarEvent[]
   isToday?: boolean
   isSelected?: boolean
 }
@@ -88,4 +99,106 @@ export function getDates(month: number, year: number): CalendarDate[] {
     }
   }
   return [...previousMonthDates, ...currentMonthDates, ...nextMonthDates]
+}
+
+/**
+ * generate a list of indices (reflecting dates) for recurring events
+ *  - helper for populatedDays
+ */
+export function getListOfIndices(
+  days: CalendarDate[],
+  startDate: string,
+  recurringEndDate: string,
+  recurringMode: string
+): number[] {
+  // index of start date
+  const date = format(parseISO(startDate), "yyyy-MM-dd")
+  let s = days.findIndex((day) => day.date === date)
+  // index of recurring end date
+  let e
+  if (recurringMode === null) e = s
+  else {
+    const endDate = format(parseISO(recurringEndDate), "yyyy-MM-dd")
+    // index is either end of month's index or recurringEndDate's
+    e =
+      days.findIndex((day) => day.date === endDate) !== -1
+        ? days.findIndex((day) => day.date === endDate)
+        : days.length - 1
+  }
+  // indices of all recurring date
+  let recurringIndices = [s]
+  if (recurringMode === "daily")
+    recurringIndices = Array.from({ length: e - s + 1 }, (_, a) => a + s)
+  else if (recurringMode === "weekly")
+    while (s <= e) {
+      recurringIndices.push(s)
+      s += 7
+    }
+  else if (recurringMode === "monthly") {
+    let dateAddable = startDate
+    let nextMonthDate = format(addMonths(new Date(dateAddable), 1), "yyyy-MM-dd")
+    let complete = false
+    while (!complete && recurringEndDate >= nextMonthDate) {
+      nextMonthDate = format(addMonths(new Date(dateAddable), 1), "yyyy-MM-dd")
+      const i = days.findIndex((day) => day.date === nextMonthDate)
+      if (i === -1) complete = true
+      else {
+        recurringIndices.push(i)
+        dateAddable = nextMonthDate
+      }
+    }
+  }
+  return recurringIndices
+}
+
+interface PopulatedDaysOptions {
+  events: Event[]
+  timeRange: { month: number; year: number }
+}
+
+/**
+ * populate days with events
+ */
+export function populatedDays(options: PopulatedDaysOptions): CalendarDate[] {
+  const {
+    events,
+    timeRange: { month, year }
+  } = options
+  const days = getDates(month, year)
+
+  events.forEach((event) => {
+    const newEvent = {
+      id: event.eventId,
+      name: event.title,
+      description: event.description,
+      location: event.location,
+      dateTime: event.startTime,
+      endTime: event.endTime,
+      timeRange12HourFormat: `${format(parseISO(event.startTime), "h:mm aa")} - ${format(parseISO(event.endTime), "h:mm aa")}`
+    }
+
+    // indices where each event can be added
+    const recurringIndices = getListOfIndices(
+      days,
+      event.startTime,
+      event.recurringEndDate,
+      event.recurringMode
+    )
+
+    // add event to days accordingly
+    recurringIndices.forEach((r) => {
+      let j = 0
+      for (let k = 0; k < days[r].events.length; k++) {
+        const existingStartTime = format(parseISO(days[r].events[k].dateTime), "HH:mm:ss")
+        const newStartTime = format(parseISO(event.startTime), "HH:mm:ss")
+        if (newStartTime > existingStartTime) {
+          j++
+        } else {
+          break
+        }
+      }
+      days[r].events.splice(j, 0, newEvent)
+    })
+  })
+  return days
 }

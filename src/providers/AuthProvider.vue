@@ -30,9 +30,7 @@ router.beforeEach(async (to) => {
 
 <template>
   <template v-if="isLoading">
-    <div class="h-dvh flex justify-center items-center">
-      <LoadingSpinner />
-    </div>
+    <LoadingSpinner />
   </template>
   <template v-else>
     <slot></slot>
