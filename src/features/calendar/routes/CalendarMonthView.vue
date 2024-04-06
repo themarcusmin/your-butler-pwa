@@ -348,7 +348,7 @@ import AppHead from "@/components/Head/AppHead.vue"
 import LoadingSpinner from "@/components/Loader/LoadingSpinner.vue"
 import AddEventForm from "@/features/calendar/components/AddEventForm.vue"
 import { useEvents } from "@/features/calendar/api/getEvents"
-import { populatedDays } from "@/utils/calendar"
+import { getDates, populatedDays } from "@/utils/calendar"
 
 const store = useCalendarStore()
 const { currentMonth, currentYear, selectedDay, eventStartTime, eventEndTime } = storeToRefs(store)
@@ -383,7 +383,7 @@ const days = computed(() => {
       events,
       timeRange: { month: currentMonth.value, year: currentYear.value }
     })
-  } else return null
+  } else return getDates(currentMonth.value, currentYear.value)
 })
 
 watch(data, (newData) => {
