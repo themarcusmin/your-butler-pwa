@@ -24,6 +24,7 @@ withDefaults(defineProps<BaseButtonProps>(), {
   variant: "primary",
   size: "sm",
   isLoading: false,
+  isDisabled: false,
   loaderText: ""
 })
 </script>
@@ -32,6 +33,7 @@ withDefaults(defineProps<BaseButtonProps>(), {
   <button
     class="inline-flex items-center rounded-lg leading-6"
     :class="[variants[variant], sizes[size]]"
+    :disabled="isLoading"
   >
     <BaseSpinner v-if="isLoading" />
     <template v-if="isLoading && loaderText">

@@ -11,30 +11,7 @@ import { toTypedSchema } from "@vee-validate/zod"
 import * as zod from "zod"
 import { format, addHours, isBefore } from "date-fns"
 
-interface IForm {
-  title: string
-  eventDate: string
-  eventTime: {
-    allDay: boolean
-    eventStartTime: string
-    eventEndTime: string
-    nextDay?: boolean
-  }
-  location: string
-  repeat: {
-    repeatMode: string
-    repeatEndDate: string
-  }
-  description?: string
-}
-
-enum RECURRENCE {
-  NEVER = "never",
-  DAILY = "daily",
-  WEEKLY = "weekly",
-  MONTHLY = "monthly",
-  YEARLY = "yearly"
-}
+import { RECURRENCE, type AddEventForm } from "../types"
 
 const schema = zod
   .object({
@@ -82,7 +59,6 @@ const schema = zod
       .superRefine(({ repeatMode, repeatEndDate }, ctx) => {
         if (repeatMode != RECURRENCE.NEVER) {
           if (!repeatEndDate) {
-            console.log("red", { ctx })
             ctx.addIssue({
               code: "custom",
               message: "Required",
@@ -105,7 +81,7 @@ const schema = zod
   })
 
 const validationSchema = toTypedSchema(schema)
-const { handleSubmit, errors } = useForm<IForm>({
+const { handleSubmit, errors } = useForm<AddEventForm>({
   validationSchema
 })
 const { value: title } = useField("title")
@@ -140,21 +116,21 @@ watch(allDay, (isChecked) => {
   }
 })
 
-// Submission
-import { useNotificationStore } from "@/stores/notification"
+// add event request
 import { useModalStore } from "@/stores/modal"
-
-const notificationStore = useNotificationStore()
-const { add } = notificationStore
+import { useCreateEvent } from "@/features/calendar/api/createEvent"
+import BaseButton from "@/components/Elements/BaseButton.vue"
+import { transformCreateEventData } from "@/utils/calendar"
 
 const modalStore = useModalStore()
 const { closeModal } = modalStore
 
-const onSubmit = handleSubmit((values) => {
-  console.log("deubg ", values)
-  alert(JSON.stringify(values, null, 2))
-  // add({ type: "success", title: "Event Added", message: `${values.title}` })
-  // closeModal()
+const { isPending, mutateAsync } = useCreateEvent()
+
+const onSubmit = handleSubmit(async (values) => {
+  const transformedData = transformCreateEventData(values)
+  await mutateAsync(transformedData)
+  closeModal() // todo: handle error
 })
 </script>
 
@@ -340,19 +316,8 @@ const onSubmit = handleSubmit((values) => {
     </div>
 
     <div class="mt-6 flex items-center justify-end gap-x-6">
-      <button
-        @click="closeModal"
-        type="button"
-        class="text-sm font-semibold leading-6 text-gray-900"
-      >
-        Cancel
-      </button>
-      <button
-        type="submit"
-        class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-      >
-        Save
-      </button>
+      <BaseButton type="button" @click="closeModal" variant="plain">Cancel</BaseButton>
+      <BaseButton type="submit" :isLoading="isPending" loaderText="Saving">Save</BaseButton>
     </div>
   </form>
 </template>

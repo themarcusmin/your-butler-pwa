@@ -6,9 +6,14 @@ import {
   subDays,
   addDays,
   addMonths,
-  parseISO
+  parseISO,
+  startOfDay,
+  endOfDay
 } from "date-fns"
-import type { Event } from "@/features/calendar/types"
+
+import { RECURRENCE } from "@/features/calendar/types"
+import type { Event, AddEventForm } from "@/features/calendar/types"
+import type { CreateEventDTO } from "@/features/calendar/api/createEvent"
 
 interface CalendarEvent {
   id: number
@@ -201,4 +206,39 @@ export function populatedDays(options: PopulatedDaysOptions): CalendarDate[] {
     })
   })
   return days
+}
+
+/**
+ * convert raw form values to request-ready values
+ *  - helper for AddEventForm data
+ */
+export const transformCreateEventData = (values: AddEventForm) => {
+  const {
+    title,
+    description,
+    location,
+    eventDate,
+    eventTime: { allDay, eventStartTime, eventEndTime, nextDay },
+    repeat: { repeatMode, repeatEndDate }
+  } = values
+  const transformedData: CreateEventDTO = {
+    title,
+    description,
+    location,
+    eventStartTime: "",
+    eventEndTime: "",
+    repeatMode,
+    repeatEndDate: undefined
+  }
+  transformedData["eventStartTime"] = allDay
+    ? startOfDay(new Date(eventDate)).toISOString()
+    : new Date(`${eventDate} ${eventStartTime}`).toISOString()
+  transformedData["eventEndTime"] = allDay
+    ? endOfDay(new Date(eventDate)).toISOString()
+    : nextDay
+      ? new Date(addDays(`${eventDate} ${eventEndTime}`, 1)).toISOString()
+      : new Date(`${eventDate} ${eventEndTime}`).toISOString()
+  transformedData["repeatEndDate"] =
+    repeatMode != RECURRENCE.NEVER ? new Date(`${repeatEndDate} 23:59:59`).toISOString() : undefined
+  return transformedData
 }
