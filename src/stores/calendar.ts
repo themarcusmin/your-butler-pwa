@@ -39,7 +39,7 @@ export const useCalendarStore = defineStore("calendar", () => {
     }
   }
 
-  function setSelectedDay(day: CalendarDate) {
+  function setSelectedDay(day?: CalendarDate) {
     selectedDay.value = day
   }
 
