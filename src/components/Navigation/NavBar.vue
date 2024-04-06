@@ -23,12 +23,12 @@ const navItems = [
     href: CALENDAR,
     routeName: CALENDAR,
     title: "Calendar"
-  },
-  {
-    href: SETTINGS,
-    routeName: SETTINGS,
-    title: "Settings"
   }
+  // {
+  //   href: SETTINGS,
+  //   routeName: SETTINGS,
+  //   title: "Settings"
+  // }
 ]
 
 const user = useCurrentUser()!
