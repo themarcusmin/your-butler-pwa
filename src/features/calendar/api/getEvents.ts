@@ -23,6 +23,7 @@ export const useEvents = ({ eventStartTime, eventEndTime }: useEventsOptions) =>
     queryKey: ["events", eventStartTime, eventEndTime],
     queryFn: () =>
       getEvents({ eventStartTime: eventStartTime.value, eventEndTime: eventEndTime.value }),
-    select: (response) => response.data
+    select: (response) => response.data,
+    refetchOnWindowFocus: false
   })
 }
