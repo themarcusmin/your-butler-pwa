@@ -1,7 +1,8 @@
 <script setup lang="ts">
-const props = defineProps<{ formTitle: string; id: string }>()
+const props = defineProps<{ formTitle: string; id: number }>()
 const { id } = props
 
+import { DialogTitle } from "@headlessui/vue"
 import { TrashIcon } from "@heroicons/vue/24/solid"
 import BaseButton from "@/components/Elements/BaseButton.vue"
 import { useDeleteEvent } from "@/features/calendar/api/deleteEvent"
@@ -29,9 +30,9 @@ const onSubmit = async () => {
         <TrashIcon class="h-6 w-6 text-white" aria-hidden="true" />
       </div>
       <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-        <DialogTitle as="h3" class="text-base font-semibold leading-6 text-gray-900"
-          >Delete Event</DialogTitle
-        >
+        <DialogTitle as="h3" class="text-base font-semibold leading-6 text-gray-900">
+          Delete Event
+        </DialogTitle>
         <div class="mt-2">
           <p class="text-sm text-gray-500">Are you sure you want to delete this event?</p>
         </div>

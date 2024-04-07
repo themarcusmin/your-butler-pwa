@@ -4,7 +4,7 @@ import type { AxiosResponse } from "axios"
 import { axios } from "@/lib/axios"
 
 interface DeleteEventDTO {
-  id: string
+  id: number
 }
 
 const deleteEvent = (data: DeleteEventDTO): Promise<AxiosResponse<any, any>> =>

@@ -1,4 +1,4 @@
-import { ref } from "vue"
+import { shallowRef } from "vue"
 import type { Component } from "vue"
 import { defineStore } from "pinia"
 
@@ -13,7 +13,7 @@ const initialState: ModalStorePayload = {
 }
 
 export const useModalStore = defineStore("modal", () => {
-  const modalState = ref(initialState)
+  const modalState = shallowRef(initialState)
 
   function openModal(payload: ModalStorePayload): void {
     const { component, props } = payload

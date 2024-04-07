@@ -370,7 +370,7 @@ function openAddEventModal() {
   openModal({ component: AddEventForm, props: { formTitle: "Add Event" } })
 }
 
-function openDeleteEventModal(id: string) {
+function openDeleteEventModal(id: number) {
   openModal({ component: DeleteEventConfirmation, props: { formTitle: "Delete Event", id } })
 }
 
