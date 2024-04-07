@@ -1,17 +1,18 @@
 <script setup lang="ts">
-defineProps<{ formTitle: string }>()
+const props = defineProps<{ formTitle: string; editEvent?: CalendarEvent }>()
+const { editEvent } = props
 
-// Toggle
 import { Switch, SwitchGroup, SwitchLabel } from "@headlessui/vue"
+import BaseButton from "@/components/Elements/BaseButton.vue"
 
 // Validation
-import { onMounted, watch } from "vue"
 import { useField, useForm } from "vee-validate"
 import { toTypedSchema } from "@vee-validate/zod"
 import * as zod from "zod"
-import { format, addHours, isBefore } from "date-fns"
+import { format, addHours, isBefore, differenceInSeconds } from "date-fns"
 
 import { RECURRENCE, type AddEventForm } from "../types"
+import type { CalendarEvent } from "@/utils/calendar"
 
 const schema = zod
   .object({
@@ -81,9 +82,53 @@ const schema = zod
   })
 
 const validationSchema = toTypedSchema(schema)
-const { handleSubmit, errors } = useForm<AddEventForm>({
-  validationSchema
+const { handleSubmit, errors, setFieldValue, values, meta } = useForm<AddEventForm>({
+  validationSchema,
+  // prepopulate form for edit event
+  ...(editEvent && {
+    initialValues: {
+      title: editEvent.title,
+      location: editEvent.location,
+      description: editEvent.description,
+      eventDate: format(new Date(editEvent.eventStartTime), "yyyy-MM-dd"),
+      eventTime: {
+        // todo: handle daylight savings which can be 24 hours +- 1 hour; question is how do we detect if it is dst
+        allDay:
+          differenceInSeconds(editEvent.eventEndTime, editEvent.eventStartTime) === 86399
+            ? true
+            : false,
+        eventStartTime: format(new Date(editEvent.eventStartTime), "HH:mm"),
+        eventEndTime: format(new Date(editEvent.eventEndTime), "HH:mm"),
+        nextDay:
+          format(new Date(editEvent.eventStartTime), "HH:mm") >
+          format(new Date(editEvent.eventEndTime), "HH:mm")
+            ? true
+            : false
+      },
+      repeat: {
+        repeatMode: editEvent.repeatMode
+          ? RECURRENCE[editEvent.repeatMode as keyof typeof RECURRENCE]
+          : RECURRENCE.NEVER,
+        repeatEndDate: editEvent.repeatEndDate
+          ? format(new Date(editEvent.repeatEndDate), "yyyy-MM-dd")
+          : undefined
+      }
+    }
+  }),
+  // prepopulate form for add event
+  ...(!editEvent && {
+    initialValues: {
+      eventDate: format(new Date(), "yyyy-MM-dd"),
+      eventTime: {
+        allDay: true
+      },
+      repeat: {
+        repeatMode: RECURRENCE.NEVER
+      }
+    }
+  })
 })
+
 const { value: title } = useField("title")
 const { value: eventDate } = useField("eventDate")
 const { value: allDay } = useField("eventTime.allDay")
@@ -95,31 +140,31 @@ const { value: repeatMode } = useField("repeat.repeatMode")
 const { value: repeatEndDate } = useField("repeat.repeatEndDate")
 const { value: description } = useField("description")
 
-// Form helper
-onMounted(() => {
-  // (Known Issue) workaround for default values: https://vee-validate.logaretm.com/v4/integrations/zod-schema-validation/
-  eventDate.value = format(new Date(), "yyyy-MM-dd")
-  repeatMode.value = RECURRENCE.NEVER
-  allDay.value = true
-})
-watch(allDay, (isChecked) => {
-  if (isChecked) {
-    eventStartTime.value = undefined
-    eventEndTime.value = undefined
-    nextDay.value = undefined
-  } else {
-    eventStartTime.value = format(new Date(), "HH:mm")
-    eventEndTime.value = format(addHours(new Date(), 1), "HH:mm")
-    // check nextDay because past midnight
-    if ((eventStartTime.value as string) > (eventEndTime.value as string)) nextDay.value = true
-    else nextDay.value = false
+const handleAllDay = (allDay: boolean) => {
+  // clear subfields
+  if (allDay) {
+    setFieldValue("eventTime.eventStartTime", undefined)
+    setFieldValue("eventTime.eventEndTime", undefined)
+    setFieldValue("eventTime.nextDay", undefined)
   }
-})
+  // set subfields
+  else {
+    if (editEvent) {
+      setFieldValue("eventTime.eventStartTime", format(new Date(editEvent.eventStartTime), "HH:mm"))
+      setFieldValue("eventTime.eventEndTime", format(new Date(editEvent.eventEndTime), "HH:mm"))
+    } else {
+      setFieldValue("eventTime.eventStartTime", format(new Date(), "HH:mm"))
+      setFieldValue("eventTime.eventEndTime", format(addHours(new Date(), 1), "HH:mm"))
+    }
+    // check nextDay because past midnight
+    const isNextDay = (eventStartTime.value as string) > (eventEndTime.value as string)
+    setFieldValue("eventTime.nextDay", isNextDay ? true : false)
+  }
+}
 
 // add event request
 import { useModalStore } from "@/stores/modal"
 import { useCreateEvent } from "@/features/calendar/api/createEvent"
-import BaseButton from "@/components/Elements/BaseButton.vue"
 import { transformCreateEventData } from "@/utils/calendar"
 
 const modalStore = useModalStore()
@@ -178,6 +223,7 @@ const onSubmit = handleSubmit(async (values) => {
                 <span class="font-medium text-gray-900">All Day</span>
               </SwitchLabel>
               <Switch
+                @update:model-value="handleAllDay"
                 v-model="allDay"
                 name="allDay"
                 :class="[
@@ -280,7 +326,7 @@ const onSubmit = handleSubmit(async (values) => {
             </select>
           </div>
 
-          <div class="col-span-full" v-if="repeatMode != 'never'">
+          <div class="col-span-full" v-if="repeatMode !== RECURRENCE.NEVER">
             <label for="repeatEndDate" class="block text-sm font-medium leading-6 text-gray-900"
               >End Date</label
             >

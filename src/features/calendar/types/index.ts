@@ -10,11 +10,11 @@ export interface Event {
 }
 
 export enum RECURRENCE {
-  NEVER = "never",
-  DAILY = "daily",
-  WEEKLY = "weekly",
-  MONTHLY = "monthly",
-  YEARLY = "yearly"
+  NEVER = "NEVER",
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  MONTHLY = "MONTHLY",
+  YEARLY = "YEARLY"
 }
 
 export interface AddEventForm {

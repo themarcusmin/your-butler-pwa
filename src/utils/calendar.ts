@@ -15,13 +15,16 @@ import { RECURRENCE } from "@/features/calendar/types"
 import type { Event, AddEventForm } from "@/features/calendar/types"
 import type { CreateEventDTO } from "@/features/calendar/api/createEvent"
 
-interface CalendarEvent {
+export interface CalendarEvent {
   id: number
-  name: string
+  title: string
   description: string
   location: string
   timeRange12HourFormat: string
-  dateTime: string
+  eventStartTime: string
+  eventEndTime: string
+  repeatMode: string
+  repeatEndDate?: string
 }
 
 export interface CalendarDate {
@@ -133,14 +136,15 @@ export function getListOfIndices(
   }
   // indices of all recurring date
   let recurringIndices = [s]
-  if (recurringMode === "daily")
+  if (recurringMode === RECURRENCE.DAILY)
     recurringIndices = Array.from({ length: e - s + 1 }, (_, a) => a + s)
-  else if (recurringMode === "weekly")
+  else if (recurringMode === RECURRENCE.WEEKLY) {
+    s += 7
     while (s <= e) {
       recurringIndices.push(s)
       s += 7
     }
-  else if (recurringMode === "monthly") {
+  } else if (recurringMode === RECURRENCE.MONTHLY) {
     let dateAddable = startDate
     let nextMonthDate = format(addMonths(new Date(dateAddable), 1), "yyyy-MM-dd")
     let complete = false
@@ -154,6 +158,7 @@ export function getListOfIndices(
       }
     }
   }
+  // todo: yearly
   return recurringIndices
 }
 
@@ -175,12 +180,14 @@ export function populatedDays(options: PopulatedDaysOptions): CalendarDate[] {
   events.forEach((event) => {
     const newEvent = {
       id: event.eventId,
-      name: event.title,
+      title: event.title,
       description: event.description,
       location: event.location,
-      dateTime: event.startTime,
-      endTime: event.endTime,
-      timeRange12HourFormat: `${format(parseISO(event.startTime), "h:mm aa")} - ${format(parseISO(event.endTime), "h:mm aa")}`
+      eventStartTime: event.startTime,
+      eventEndTime: event.endTime,
+      timeRange12HourFormat: `${format(parseISO(event.startTime), "h:mm aa")} - ${format(parseISO(event.endTime), "h:mm aa")}`,
+      repeatMode: event.recurringMode,
+      repeatEndDate: event.recurringEndDate
     }
 
     // indices where each event can be added
@@ -195,7 +202,7 @@ export function populatedDays(options: PopulatedDaysOptions): CalendarDate[] {
     recurringIndices.forEach((r) => {
       let j = 0
       for (let k = 0; k < days[r].events.length; k++) {
-        const existingStartTime = format(parseISO(days[r].events[k].dateTime), "HH:mm:ss")
+        const existingStartTime = format(parseISO(days[r].events[k].eventStartTime), "HH:mm:ss")
         const newStartTime = format(parseISO(event.startTime), "HH:mm:ss")
         if (newStartTime > existingStartTime) {
           j++

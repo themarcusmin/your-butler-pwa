@@ -241,10 +241,10 @@
                   <p
                     class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600"
                   >
-                    {{ event.name }}
+                    {{ event.title }}
                   </p>
                   <time
-                    :datetime="event.dateTime"
+                    :datetime="event.eventStartTime"
                     class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block"
                     >{{ event.description }}</time
                   >
@@ -312,22 +312,24 @@
           class="group flex p-4 pr-6 focus-within:bg-gray-50 hover:bg-gray-50"
         >
           <div class="flex-auto">
-            <p class="font-semibold text-gray-900">{{ event.name }}</p>
-            <time :datetime="event.dateTime" class="mt-2 flex items-center text-gray-700">
+            <p class="font-semibold text-gray-900">{{ event.title }}</p>
+            <time :datetime="event.eventStartTime" class="mt-2 flex items-center text-gray-700">
               <ClockIcon class="mr-2 h-5 w-5 text-gray-400" aria-hidden="true" />
               {{ event.timeRange12HourFormat }}
             </time>
           </div>
           <!-- todo @daily view: :href="`event/${event.id}`" -->
-          <a
+          <!-- <button
             class="ml-6 flex-none self-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-sm ring-1 ring-inset ring-gray-300 hover:ring-gray-400 focus:opacity-100 group-hover:opacity-100"
-            >Edit<span class="sr-only">, {{ event.name }}</span></a
+            @click="openEditEventModal(event)"
           >
+            Edit<span class="sr-only">, {{ event.title }}</span>
+          </button> -->
           <button
             class="ml-6 flex-none self-center rounded-md bg-red-600 px-3 py-2 font-semibold text-white opacity-0 shadow-sm ring-1 ring-inset ring-red-500 hover:ring-red-500 focus:opacity-100 group-hover:opacity-100 hover:bg-red-500"
             @click="openDeleteEventModal(event.id)"
           >
-            Delete<span class="sr-only">, {{ event.name }}</span>
+            Delete<span class="sr-only">, {{ event.title }}</span>
           </button>
         </li>
       </ol>
