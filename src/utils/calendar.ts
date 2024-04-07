@@ -118,7 +118,8 @@ export function getListOfIndices(
 ): number[] {
   // index of start date
   const date = format(parseISO(startDate), "yyyy-MM-dd")
-  let s = days.findIndex((day) => day.date === date)
+  const startIndex = days.findIndex((day) => day.date === date)
+  let s = startIndex === -1 ? 0 : startIndex // account for startingDate not in days (recurring event from another period)
   // index of recurring end date
   let e
   if (recurringMode === null) e = s
