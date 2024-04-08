@@ -1,5 +1,6 @@
 import Axios from "axios"
 import { getCurrentUser } from "vuefire"
+import { API_URL } from "@/config/api"
 
 const getAccessToken = async () => {
   const user = await getCurrentUser()
@@ -8,7 +9,7 @@ const getAccessToken = async () => {
 }
 
 export const axios = Axios.create({
-  baseURL: "http://localhost:8080" // todo: replace
+  baseURL: API_URL
 })
 axios.interceptors.request.use(async (config) => {
   const accessToken = await getAccessToken()
