@@ -15,7 +15,7 @@ import { useCurrentUser, useFirebaseAuth } from "vuefire"
 import { useRoute } from "vue-router"
 import router from "@/router"
 import { LANDING } from "@/router/public"
-import { CALENDAR, SETTINGS } from "@/router/private"
+import { CALENDAR } from "@/router/private"
 import logo from "@/assets/logo.svg"
 
 const navItems = [

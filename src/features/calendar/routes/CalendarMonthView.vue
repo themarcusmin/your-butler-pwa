@@ -219,6 +219,7 @@
           <div
             v-for="day in days"
             :key="day.date"
+            :item="day"
             :class="[
               day.isCurrentMonth ? 'bg-white' : 'bg-gray-150 text-gray-500',
               'relative px-3 py-2'
@@ -232,7 +233,10 @@
                   ? 'flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white'
                   : undefined
               "
-              >{{ day.date.split("-").pop().replace(/^0/, "") }}</time
+              >{{
+                // @ts-ignore
+                day.date.split("-").pop().replace(/^0/, "")
+              }}</time
             >
             <ol v-if="day.events.length > 0" class="mt-2">
               <li v-for="event in day.events.slice(0, 2)" :key="event.id">
@@ -283,7 +287,10 @@
                 day.isSelected && 'flex h-6 w-6 items-center justify-center rounded-full',
                 'ml-auto'
               ]"
-              >{{ day.date.split("-").pop().replace(/^0/, "") }}</time
+              >{{
+                // @ts-ignore
+                day.date.split("-").pop().replace(/^0/, "")
+              }}</time
             >
             <span class="sr-only">{{ day.events.length }} events</span>
             <span v-if="day.events.length > 0" class="-mx-0.5 mt-auto flex flex-wrap-reverse">
@@ -297,7 +304,7 @@
         </div>
       </div>
     </div>
-    <div v-if="selectedDay?.events.length > 0" class="px-4 py-10 sm:px-6">
+    <div v-if="selectedDay && selectedDay.events.length > 0" class="px-4 py-10 sm:px-6">
       <div>
         <h1 class="mb-4 text-left text-base leading-6 text-gray-500">
           {{ format(selectedDay.date, "MMMM d, yyyy") }}
@@ -358,7 +365,7 @@ import LoadingSpinner from "@/components/Loader/LoadingSpinner.vue"
 import AddEventForm from "@/features/calendar/components/AddEventForm.vue"
 import DeleteEventConfirmation from "@/features/calendar/components/DeleteEventConfirmation.vue"
 import { useEvents } from "@/features/calendar/api/getEvents"
-import { getDates, populatedDays } from "@/utils/calendar"
+import { getDates, populatedDays, type CalendarDate } from "@/utils/calendar"
 
 const store = useCalendarStore()
 const { currentMonth, currentYear, selectedDay, eventStartTime, eventEndTime } = storeToRefs(store)
@@ -390,14 +397,15 @@ interface CalendarDictionary {
 
 const calendarDictionary = ref<CalendarDictionary>({})
 
-const days = computed(() => {
+const days = computed<CalendarDate[]>(() => {
   const events = calendarDictionary.value[`${eventStartTime.value}-${eventEndTime.value}`]
   if (events && events.length) {
     return populatedDays({
       events,
       timeRange: { month: currentMonth.value, year: currentYear.value }
     })
-  } else return getDates(currentMonth.value, currentYear.value)
+  }
+  return getDates(currentMonth.value, currentYear.value)
 })
 
 watch(data, (newData) => {

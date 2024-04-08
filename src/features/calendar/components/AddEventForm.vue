@@ -82,7 +82,7 @@ const schema = zod
   })
 
 const validationSchema = toTypedSchema(schema)
-const { handleSubmit, errors, setFieldValue, values, meta } = useForm<AddEventForm>({
+const { handleSubmit, errors, setFieldValue } = useForm<AddEventForm>({
   validationSchema,
   // prepopulate form for edit event
   ...(editEvent && {
@@ -129,16 +129,16 @@ const { handleSubmit, errors, setFieldValue, values, meta } = useForm<AddEventFo
   })
 })
 
-const { value: title } = useField("title")
-const { value: eventDate } = useField("eventDate")
-const { value: allDay } = useField("eventTime.allDay")
-const { value: eventStartTime } = useField("eventTime.eventStartTime")
-const { value: eventEndTime } = useField("eventTime.eventEndTime")
-const { value: nextDay } = useField("eventTime.nextDay")
-const { value: location } = useField("location")
-const { value: repeatMode } = useField("repeat.repeatMode")
-const { value: repeatEndDate } = useField("repeat.repeatEndDate")
-const { value: description } = useField("description")
+const { value: title } = useField<string>("title")
+const { value: eventDate } = useField<string>("eventDate")
+const { value: allDay } = useField<boolean>("eventTime.allDay")
+const { value: eventStartTime } = useField<string>("eventTime.eventStartTime")
+const { value: eventEndTime } = useField<string>("eventTime.eventEndTime")
+const { value: nextDay } = useField<boolean>("eventTime.nextDay")
+const { value: location } = useField<string>("location")
+const { value: repeatMode } = useField<string>("repeat.repeatMode")
+const { value: repeatEndDate } = useField<string>("repeat.repeatEndDate")
+const { value: description } = useField<string>("description")
 
 const handleAllDay = (allDay: boolean) => {
   // clear subfields

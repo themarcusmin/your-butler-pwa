@@ -1,4 +1,5 @@
 import defaultTheme from "tailwindcss/defaultTheme"
+import formsPlugin from "@tailwindcss/forms"
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -9,5 +10,5 @@ export default {
       sans: ["Inter var", ...defaultTheme.fontFamily.sans]
     }
   },
-  plugins: [require("@tailwindcss/forms")]
+  plugins: [formsPlugin]
 }
