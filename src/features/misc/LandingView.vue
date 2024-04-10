@@ -39,7 +39,7 @@ onMounted(() => {
       <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
         <span class="block">Intent</span>
       </h2>
-      <p>Get Work Done</p>
+      <p>Never Miss a Beat</p>
       <div class="mt-8 flex justify-center">
         <div
           class="inline-flex shadow border rounded-md px-6 py-2 bg-indigo-700 hover:bg-indigo-600 hover:cursor-pointer text-neutral-50"
